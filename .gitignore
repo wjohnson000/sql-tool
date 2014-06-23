@@ -1,0 +1,35 @@
+# project settings files
+*.idea
+*.ipr
+*.iml
+*.iws
+.classpath
+.settings
+.project
+
+# files that maven/testng creates
+*.versionsBackup
+*target
+*classes.xml
+*groups.xml
+test-output
+
+
+# files that our tests create
+SearchApi.trace
+serverLog.*
+audit*.log
+fchdata
+
+# special cases for fsbe-domain
+
+# special cases for fs-api
+dmt.tmp
+session.log
+
+# special cases for ct-rest-api
+tomcat-install
+atlassian-ide-plugin.xml
+
+# misc
+*~
