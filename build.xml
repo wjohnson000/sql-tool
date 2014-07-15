@@ -1,0 +1,116 @@
+<project name="SqlTool build" default="compile" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property environment="env"/>
+  <property name="src"     value="src"/>
+  <property name="build"   value="build"/>
+  <property name="lib"     value="lib"/>
+  <property name="jar"     value="jar"/>
+  <property name="javaLib" value="${env.JAVA_LIB_HOME}"/>
+  <property name="args"    value=""/>
+
+
+  <!-- set up the class path -->
+  <path id="project.class.path">
+    <pathelement path="${java.class.path}/"/>
+  	<fileset dir="${jar}">
+  		<include name="*.jar"/>
+  	</fileset>
+  </path>
+
+
+  <!-- set up the class path for running the silly thing -->
+  <path id="run.class.path">
+    <pathelement path="${java.class.path}/"/>
+    <pathelement location="${lib}/sqltool.jar"/>
+  	<fileset dir="${jar}">
+  		<include name="*.jar"/>
+  	</fileset>
+  </path>
+
+  <!-- set up the class path for running the silly thing -->
+  <path id="stable-run.class.path">
+    <pathelement path="${java.class.path}/"/>
+    <pathelement location="${lib}/sqltool-stable.jar"/>
+  	<fileset dir="${jar}">
+  		<include name="*.jar"/>
+  	</fileset>
+  </path>
+
+
+  <!-- create the directories needed for this project -->
+  <target name="init">
+    <mkdir dir="${build}"/>
+    <mkdir dir="${lib}"/>
+  </target>
+
+
+  <!-- Clean up the BUILD directory-->
+  <target name="clean-build">
+    <delete dir="${build}"/>
+  </target>
+
+
+
+  <!-- compile the source, saving the results to the BUILD directory -->
+  <target name="compile" depends="init">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}">
+      <classpath refid="project.class.path"/>
+    </javac>
+    <copy todir="${build}" includeEmptyDirs="false">
+      <fileset dir="./image">
+        <include name="**/*.gif"/>
+      </fileset>
+    </copy>
+    <copy todir="${build}" includeEmptyDirs="false">
+      <fileset dir="${src}">
+        <include name="**/*.properties"/>
+      </fileset>
+    </copy>
+  </target>
+
+
+  <!-- create a JAR file containing today's build -->
+  <target name="dist" depends="compile">
+    <!-- Put everything from ${build} into the sqltool.jar file -->
+    <jar jarfile="${lib}/sqltool.jar" basedir="${build}"/>
+  </target>
+
+
+  <!-- make the current version the 'stable' one -->
+  <target name="dist-stable" depends="dist">
+    <jar jarfile="${lib}/sqltool-stable.jar" basedir="${build}"/>
+  </target>
+
+
+  <!-- execute the application -->
+  <target name="go" depends="dist">
+    <java classname="sqltool.SqlToolMain" fork="yes">
+      <jvmarg value="-Xms192m"/>
+      <jvmarg value="-Xmx384m"/>
+      <jvmarg value="-Xss24m"/>
+      <jvmarg value="-Dswing.aatext=true"/>
+        <jvmarg value="-Dsun.jnu.encoding=UTF-8"/>
+        <jvmarg value="-Dfile.encoding=UTF-8"/>
+      <classpath refid="run.class.path"/>
+      <arg line="${args}"/>
+    </java>
+  </target>
+
+  <!-- execute the application -->
+  <target name="go-stable" depends="dist">
+    <java classname="sqltool.SqlToolMain" fork="yes">
+      <jvmarg value="-Xms192m"/>
+      <jvmarg value="-Xmx384m"/>
+      <jvmarg value="-Xss24m"/>
+      <jvmarg value="-Dswing.aatext=true"/>
+      <jvmarg value="-Dsun.jnu.encoding=UTF-8"/>
+      <jvmarg value="-Dfile.encoding=UTF-8"/>
+      <classpath refid="stable-run.class.path"/>
+      <arg line="${args}"/>
+    </java>
+  </target>
+	
+</project>
+

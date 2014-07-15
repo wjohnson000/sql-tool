@@ -56,6 +56,7 @@ public class SqlEditorUI extends JDialog {
 			this.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 			
 			sqlDoc = new SqlDocument();
+            sqlDoc.setTextPane(sqlEditor);  // TODO see if this is necessary ...
 			sqlEditor.setDocument(sqlDoc);
 			checkConfig(UserConfig.FONT_QUERY_EDITOR);
 			checkConfig(UserConfig.PARAM_TAB_SPACING);

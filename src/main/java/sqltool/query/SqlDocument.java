@@ -2,6 +2,8 @@ package sqltool.query;
 
 import java.awt.Color;
 import java.util.ArrayList;
+
+import javax.swing.JTextPane;
 import javax.swing.text.*;
 import javax.swing.event.DocumentEvent;
 
@@ -108,6 +110,8 @@ public class SqlDocument extends DefaultStyledDocument {
 	private String[]  functionList;
 	private ArrayList<SqlChunk> chunks = new ArrayList<SqlChunk>(10);
 
+	JTextPane         myPane;
+
 
 	/**
 	 * Constructor sets up the default styles to use in "coloring" the SQL
@@ -141,7 +145,10 @@ public class SqlDocument extends DefaultStyledDocument {
 		
 		setDefaultKeywords();
 	}
-	
+
+	public void setTextPane(JTextPane aPane) {
+	    myPane = aPane;
+	}
 
 	/**
 	 * Method that handles insertion of new text: call the parent method
@@ -338,6 +345,12 @@ public class SqlDocument extends DefaultStyledDocument {
 			return;
 		}
 
+        int caretPosition = 0;
+		if (myPane != null) {
+		    caretPosition = myPane.getCaretPosition();
+		    myPane.setDocument(new DefaultStyledDocument());
+		}
+
 		SqlToolkit.appLogger.logDebug(">>>Enter 'setPrettyColors' ... " + Thread.currentThread());
 		long nnow = System.currentTimeMillis();
 		adjustDone = false;
@@ -423,7 +436,12 @@ public class SqlDocument extends DefaultStyledDocument {
 			SqlToolkit.appLogger.logDebug("...Check2 'setPrettyColors' ... " + (System.currentTimeMillis()-nnow) + " ms");
 			nnow = System.currentTimeMillis();
 		} finally {
-			adjustDone = true;
+		    if (myPane != null) {
+		        myPane.setDocument(this);
+		        myPane.setCaretPosition(caretPosition);
+		    }
+
+		    adjustDone = true;
 			this.fireChangedUpdate(new DefaultDocumentEvent(0, getLength(), DocumentEvent.EventType.CHANGE));
 			this.writeUnlock();
 		}

@@ -163,6 +163,7 @@ public class QueryPanel extends TabParentPanel {
             buildOptionPopupMenu();
             SqlToolkit.userConfig.addObserver(this);
             sqlDoc = new SqlDocument();
+            sqlDoc.setTextPane(queryEditor);  // TODO see if this is necessary ...
             queryEditor.setDocument(sqlDoc);
             queryEditor.enableInputMethods(false);  // allow plain-text only; no fancy characters
             checkConfig(UserConfig.FONT_QUERY_EDITOR);

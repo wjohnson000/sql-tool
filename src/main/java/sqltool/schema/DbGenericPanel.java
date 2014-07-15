@@ -132,6 +132,7 @@ public class DbGenericPanel extends JPanel implements Observer {
 		columnTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		
 		sqlDoc = new SqlDocument();
+		sqlDoc.setTextPane(scriptEditor);  // TODO see if this is necessary ...
 		scriptEditor.setDocument(sqlDoc);
 		scriptEditor.setEditable(false);
 

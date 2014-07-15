@@ -100,6 +100,7 @@ public class DbCustomPanel extends JPanel implements Observer, MenuHandler {
         detailLabel.setForeground(Color.blue);
 
         sqlDoc = new SqlDocument();
+        sqlDoc.setTextPane(scriptEditor);  // TODO see if this is necessary ...
         scriptEditor.setDocument(sqlDoc);
         scriptEditor.setEditable(false);
 

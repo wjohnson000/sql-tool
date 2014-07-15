@@ -51,6 +51,7 @@ public class SqlTextPane extends JTextPane {
 	 */
 	public SqlTextPane(SqlDocument doc) {
 		super(doc);
+		doc.setTextPane(this);
 		addDocumentListeners();
 	}
 
