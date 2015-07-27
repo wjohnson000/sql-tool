@@ -1058,7 +1058,9 @@ public class QueryPanel extends TabParentPanel {
                     for (int i=0;  i<colCnt;  i++) {
                         TableColumn tc = tcm.getColumn(i);
                         int colWidth = resultTableModel.getCharacterWidth(i);
-                        tc.setPreferredWidth(Math.min( (colWidth + 2) * 5, 400));
+                        int hdrWidth = String.valueOf(tc.getHeaderValue()).length() * 7 / 4;
+                        int pixels = (Math.max(colWidth, hdrWidth) + 2) * 5;
+                        tc.setPreferredWidth(Math.min(pixels, 400));
                     }
 
                     // Check to see if there was an error returned

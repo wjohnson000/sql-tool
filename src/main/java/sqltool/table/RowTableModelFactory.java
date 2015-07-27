@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.UUID;
 
 import sqltool.common.SqlToolkit;
 
@@ -376,6 +377,8 @@ public class RowTableModelFactory implements Runnable {
 								colType[i] = Boolean.class;
 							} else if (type == Types.CLOB) {
 								colType[i] = Clob.class;
+                            } else if (type == Types.BINARY  &&  prec == 16) {
+                                colType[i] = UUID.class;
 							} else {
 								colType[i] = Object.class;
 							}
@@ -467,6 +470,9 @@ public class RowTableModelFactory implements Runnable {
 									row[i] = new Boolean(rset.getBoolean(i + 1));
 								} else if (colType[i] == Clob.class) {
 									row[i] = rset.getClob(i + 1);
+                                } else if (colType[i] == UUID.class) {
+                                    byte[] bytes = rset.getBytes(i + 1);
+                                    row[i] = UUID.nameUUIDFromBytes(bytes);
 								} else if (colType[i] == Object.class) {
 									thing = rset.getObject(i + 1);
 									row[i] = (thing == null) ? null : ("Class: " + thing.getClass().getName());

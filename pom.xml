@@ -6,6 +6,27 @@
   <name>sqltool</name>
   <description>Simple SQL Tool</description>
 
+  <properties>
+    <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
+    <java.compiler.version>1.7</java.compiler.version>
+    <java.compiler.encoding>UTF-8</java.compiler.encoding>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <inherited>true</inherited>
+        <configuration>
+          <source>${java.compiler.version}</source>
+          <target>${java.compiler.version}</target>
+          <encoding>${java.compiler.encoding}</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>com.oracle</groupId>

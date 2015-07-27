@@ -3,9 +3,10 @@
 *.ipr
 *.iml
 *.iws
-.classpath
 .settings
-.project
+build
+jar
+lib
 
 # files that maven/testng creates
 *.versionsBackup
@@ -33,3 +34,4 @@ atlassian-ide-plugin.xml
 
 # misc
 *~
+/bin/
