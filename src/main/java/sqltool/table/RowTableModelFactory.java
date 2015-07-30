@@ -2,6 +2,7 @@ package sqltool.table;
 
 
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -472,7 +473,10 @@ public class RowTableModelFactory implements Runnable {
 									row[i] = rset.getClob(i + 1);
                                 } else if (colType[i] == UUID.class) {
                                     byte[] bytes = rset.getBytes(i + 1);
-                                    row[i] = UUID.nameUUIDFromBytes(bytes);
+                                    ByteBuffer bb = ByteBuffer.wrap(bytes);
+                                    long high = bb.getLong();
+                                    long low = bb.getLong();
+                                    row[i] = new UUID(high, low);
 								} else if (colType[i] == Object.class) {
 									thing = rset.getObject(i + 1);
 									row[i] = (thing == null) ? null : ("Class: " + thing.getClass().getName());
