@@ -446,7 +446,6 @@ public class RowTableModelFactory implements Runnable {
 				// Keep retrieving records unless we receive a command to cease and
 				// desist (stopNow) or a request to pause temporarily (beActive)
 				boolean hasMore = true;
-				int irow = 0;
 				while (! stopNow  &&  hasMore) {
 					if (beActive) {
 						if (rset.next()) {
@@ -473,10 +472,14 @@ public class RowTableModelFactory implements Runnable {
 									row[i] = rset.getClob(i + 1);
                                 } else if (colType[i] == UUID.class) {
                                     byte[] bytes = rset.getBytes(i + 1);
-                                    ByteBuffer bb = ByteBuffer.wrap(bytes);
-                                    long high = bb.getLong();
-                                    long low = bb.getLong();
-                                    row[i] = new UUID(high, low);
+                                    if (rset.wasNull()) {
+                                        row[i] = null;
+                                    } else {
+                                        ByteBuffer bb = ByteBuffer.wrap(bytes);
+                                        long high = bb.getLong();
+                                        long low = bb.getLong();
+                                        row[i] = new UUID(high, low);
+                                    }
 								} else if (colType[i] == Object.class) {
 									thing = rset.getObject(i + 1);
 									row[i] = (thing == null) ? null : ("Class: " + thing.getClass().getName());
@@ -502,7 +505,6 @@ public class RowTableModelFactory implements Runnable {
 					} else {
 						try { Thread.sleep(250); } catch (Exception ex2) { }
 					}
-					irow++;
 				}
 				SqlToolkit.appLogger.logDebug("      RTMF.execute: Row data retrieval complete, rows: " + sqlModel.getRowCount());
 
