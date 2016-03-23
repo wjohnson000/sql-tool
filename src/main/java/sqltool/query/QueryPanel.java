@@ -137,6 +137,7 @@ public class QueryPanel extends TabParentPanel {
     private JPanel jPanel1 = new JPanel();
     private JTabbedPane tabbedPane = new JTabbedPane();
     private JLabel jLabel1 = new JLabel();
+    @SuppressWarnings("rawtypes")
     private JComboBox serverListCB = new JComboBox();
     private JScrollPane queryPane = new JScrollPane();
     private JScrollPane resultPane = new JScrollPane();

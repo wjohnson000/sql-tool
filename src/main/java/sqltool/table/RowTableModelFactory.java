@@ -215,7 +215,7 @@ public class RowTableModelFactory implements Runnable {
 		
 		query = query.trim();
 		this.query = query.replace(NON_BREAKING_SPACE, ' ');  // Replace non-breaking spaces [ASCII(160)]
-		sqlModel   = (isMulti) ? new RowTableModelMulti() : new RowTableModel();
+		sqlModel = (isMulti) ? new RowTableModelMulti() : new RowTableModel();
 		Thread myThread = new Thread(this);
 		myThread.start();
 		
@@ -283,7 +283,7 @@ public class RowTableModelFactory implements Runnable {
         errorMessage  = "";
         this.conn     = conn;
 
-        sqlModel   = new RowTableModelMulti();
+        sqlModel = new RowTableModelMulti();
         Thread myThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -574,7 +574,7 @@ public class RowTableModelFactory implements Runnable {
                     for (int result : results) {
                         Object[] rowData = { new Integer(result) };
                         sqlModel.addRow(rowData, true);
-                        message += "Rows updated: " + result;
+                        message += "\nRows updated: " + result;
                     }
                     conn.commit();
                 }
