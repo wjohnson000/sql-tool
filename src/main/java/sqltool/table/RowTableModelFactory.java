@@ -283,7 +283,7 @@ public class RowTableModelFactory implements Runnable {
         errorMessage  = "";
         this.conn     = conn;
 
-        sqlModel = new RowTableModelMulti();
+        sqlModel = new RowTableModel();
         Thread myThread = new Thread(new Runnable() {
             @Override
             public void run() {
