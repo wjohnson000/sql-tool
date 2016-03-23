@@ -19,12 +19,18 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
 import javax.swing.*;
@@ -437,6 +443,7 @@ public class QueryPanel extends TabParentPanel {
     /**
      *  Set the list of servers ...
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void updateServerList() {
         DbDefinition dbTemp = (DbDefinition)serverListCB.getSelectedItem();
         serverListCB.setModel(new DefaultComboBoxModel(SqlToolkit.dbDefManager.getDbDefList().toArray()));
@@ -1035,7 +1042,6 @@ public class QueryPanel extends TabParentPanel {
             }
 
             // Have the "factory" kick off the retrieval process
-            final long nnow = System.currentTimeMillis();
             resultTableModel = sqlModelFactory.createModelData(conn, query, sqlDelim, doMulti);
             resultTable.setModel(resultTableModel);
             if (isQueryResultsSplit) {
@@ -1044,52 +1050,7 @@ public class QueryPanel extends TabParentPanel {
                 tabbedPane.setSelectedComponent(querySplitPane);
             }
 
-            // Set up a small thread-ed process to monitor the query process
-            Thread monitorProcess = new Thread(new Runnable() {
-                public void run() {
-                    while (sqlModelFactory.isActive()) {
-                        try { Thread.sleep(250); } catch (Exception ex) {}
-                    }
-                    redBtnPush(false);
-
-                    // Do a little fun re-sizing of the table columns
-                    TableColumnModel tcm = resultTable.getColumnModel();
-                    int colCnt = tcm.getColumnCount();
-                    for (int i=0;  i<colCnt;  i++) {
-                        TableColumn tc = tcm.getColumn(i);
-                        int colWidth = resultTableModel.getCharacterWidth(i);
-                        int hdrWidth = String.valueOf(tc.getHeaderValue()).length() * 7 / 4;
-                        int pixels = (Math.max(colWidth, hdrWidth) + 2) * 5;
-                        tc.setPreferredWidth(Math.min(pixels, 400));
-                    }
-
-                    // Check to see if there was an error returned
-                    int    rowCnt  = resultTableModel.getRowCount();   
-                    String message = "Rows returned: " + rowCnt;
-                    message += "\n\nTime: " + (System.currentTimeMillis() - nnow) + " milliseconds";
-                    message += sqlModelFactory.getMessage();
-                    messageArea.setText(message);
-
-                    String errorMessage = sqlModelFactory.getErrorMessage();
-                    if (errorMessage != null  &&  errorMessage.trim().length() > 0) {
-                        if (errorMessage.length() > 1024) {
-                            errorMessage = errorMessage.substring(0,1024) + " ...";
-                        }
-                        JOptionPane.showMessageDialog(null, errorMessage, "Errors", JOptionPane.ERROR_MESSAGE);
-                    }
-
-                    if (rowCnt > 0) {
-                        if (isQueryResultsSplit) {
-                            tabbedPane.setSelectedComponent(resultPane);
-                        } else {
-                            tabbedPane.setSelectedComponent(querySplitPane);
-                        }
-                    } else {
-                        tabbedPane.setSelectedComponent(messagePane);
-                    }
-                }
-            });
-            monitorProcess.start();
+            monitorQuery();
         }
     }
 
@@ -1112,7 +1073,7 @@ public class QueryPanel extends TabParentPanel {
     }
 
     /**
-     * 
+     * Run all of the queries from a file, batching them 100 statements at a time.
      */
     private void runFromFile() {
         if (sqlModelFactory.isActive()) {
@@ -1130,6 +1091,38 @@ public class QueryPanel extends TabParentPanel {
         String file = fd.getFile();
         if (file != null) {
             prevDir = path;
+            Path fpath = Paths.get(path, file);
+            try {
+                List<String> queries = Files.readAllLines(fpath, Charset.forName("UTF-8"));
+                dbDef = (DbDefinition) serverListCB.getSelectedItem();
+                if (dbDef == null) {
+                    JOptionPane.showMessageDialog(this, "No database server defined", "",
+                            JOptionPane.WARNING_MESSAGE);
+                    messageArea.setText("");
+                    redBtnPush(false);
+                    return;
+                }
+
+                Connection conn = ConnectionManager.GetConnection(dbDef, true);
+                if (conn == null) {
+                    messageArea.setText(ConnectionManager.GetConnectionError(dbDef));
+                    tabbedPane.setSelectedComponent(messagePane);
+                    redBtnPush(false);
+                    return;
+                }
+
+                resultTableModel = sqlModelFactory.createModelData(conn, queries);
+                resultTable.setModel(resultTableModel);
+                if (isQueryResultsSplit) {
+                    tabbedPane.setSelectedComponent(resultPane);
+                } else {
+                    tabbedPane.setSelectedComponent(querySplitPane);
+                }
+
+                monitorQuery();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Unable to read queries from file: " + fpath);
+            }
         }
     }
 
@@ -1179,6 +1172,60 @@ public class QueryPanel extends TabParentPanel {
             yellowBtn.setEnabled(false);
             redBtn.setEnabled(false);
         }
+    }
+
+    /**
+     * Background thread to monitor the process of the query ...
+     * @param nnow when the silly thing started
+     */
+    private void monitorQuery() {
+        final long nnow = System.currentTimeMillis();
+        // Set up a small thread-ed process to monitor the query process
+        Thread monitorProcess = new Thread(new Runnable() {
+            public void run() {
+                while (sqlModelFactory.isActive()) {
+                    try { Thread.sleep(250); } catch (Exception ex) {}
+                }
+                redBtnPush(false);
+
+                // Do a little fun re-sizing of the table columns
+                TableColumnModel tcm = resultTable.getColumnModel();
+                int colCnt = tcm.getColumnCount();
+                for (int i=0;  i<colCnt;  i++) {
+                    TableColumn tc = tcm.getColumn(i);
+                    int colWidth = resultTableModel.getCharacterWidth(i);
+                    int hdrWidth = String.valueOf(tc.getHeaderValue()).length() * 7 / 4;
+                    int pixels = (Math.max(colWidth, hdrWidth) + 2) * 5;
+                    tc.setPreferredWidth(Math.min(pixels, 400));
+                }
+
+                // Check to see if there was an error returned
+                int    rowCnt  = resultTableModel.getRowCount();   
+                String message = "Rows returned: " + rowCnt;
+                message += "\n\nTime: " + (System.currentTimeMillis() - nnow) + " milliseconds";
+                message += sqlModelFactory.getMessage();
+                messageArea.setText(message);
+
+                String errorMessage = sqlModelFactory.getErrorMessage();
+                if (errorMessage != null  &&  errorMessage.trim().length() > 0) {
+                    if (errorMessage.length() > 1024) {
+                        errorMessage = errorMessage.substring(0,1024) + " ...";
+                    }
+                    JOptionPane.showMessageDialog(null, errorMessage, "Errors", JOptionPane.ERROR_MESSAGE);
+                }
+
+                if (rowCnt > 0) {
+                    if (isQueryResultsSplit) {
+                        tabbedPane.setSelectedComponent(resultPane);
+                    } else {
+                        tabbedPane.setSelectedComponent(querySplitPane);
+                    }
+                } else {
+                    tabbedPane.setSelectedComponent(messagePane);
+                }
+            }
+        });
+        monitorProcess.start();
     }
 
     /**

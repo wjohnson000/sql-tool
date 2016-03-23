@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.List;
 import java.util.UUID;
 
 import sqltool.common.SqlToolkit;
@@ -30,37 +31,43 @@ public class RowTableModelFactory implements Runnable {
 	static java.util.Map<Integer,String> JDBCType;
 	
 	static {
-		JDBCType = new java.util.HashMap<Integer,String>(100);
+		JDBCType = new java.util.HashMap<Integer,String>(64);
+        JDBCType.put(new Integer(Types.ARRAY),         "ARRAY");
+        JDBCType.put(new Integer(Types.BIGINT),        "BIGINT");
+        JDBCType.put(new Integer(Types.BINARY),        "BINARY");
 		JDBCType.put(new Integer(Types.BIT),           "BIT");
+        JDBCType.put(new Integer(Types.BLOB),          "BLOB");
+        JDBCType.put(new Integer(Types.BOOLEAN),       "BOOLEAN");
+        JDBCType.put(new Integer(Types.CHAR),          "CHAR");
+        JDBCType.put(new Integer(Types.CLOB),          "CLOB");
+        JDBCType.put(new Integer(Types.DATALINK),      "DATALINK");
+        JDBCType.put(new Integer(Types.DATE),          "DATE");
+        JDBCType.put(new Integer(Types.DECIMAL),       "DECIMAL");
+        JDBCType.put(new Integer(Types.DISTINCT),      "DISTINCT");
+        JDBCType.put(new Integer(Types.DOUBLE),        "DOUBLE");
+        JDBCType.put(new Integer(Types.FLOAT),         "FLOAT");
+        JDBCType.put(new Integer(Types.INTEGER),       "INTEGER");
+        JDBCType.put(new Integer(Types.JAVA_OBJECT),   "JAVA_OBJECT");
+        JDBCType.put(new Integer(Types.LONGNVARCHAR),  "LONGNVARCHAR");
+        JDBCType.put(new Integer(Types.LONGVARBINARY), "LONGVARBINARY");
+        JDBCType.put(new Integer(Types.LONGVARCHAR),   "LONGVARCHAR");
+        JDBCType.put(new Integer(Types.NCHAR),         "NCHAR");
+        JDBCType.put(new Integer(Types.NCLOB),         "NCLOB");
+        JDBCType.put(new Integer(Types.NULL),          "NULL");
+        JDBCType.put(new Integer(Types.NUMERIC),       "NUMERIC");
+        JDBCType.put(new Integer(Types.NVARCHAR),      "NVARCHAR");
+        JDBCType.put(new Integer(Types.OTHER),         "OTHER");
+        JDBCType.put(new Integer(Types.REAL),          "REAL");
+        JDBCType.put(new Integer(Types.REF),           "REF");
+        JDBCType.put(new Integer(Types.ROWID),         "ROWID");
+        JDBCType.put(new Integer(Types.SMALLINT),      "SMALLINT");
+        JDBCType.put(new Integer(Types.SQLXML),        "SQLXML");
+        JDBCType.put(new Integer(Types.STRUCT),        "STRUCT");
+        JDBCType.put(new Integer(Types.TIME),          "TIME");
+        JDBCType.put(new Integer(Types.TIMESTAMP),     "TIMESTAMP");
 		JDBCType.put(new Integer(Types.TINYINT),       "TINYINT");
-		JDBCType.put(new Integer(Types.BIGINT),        "BIGINT");
-		JDBCType.put(new Integer(Types.LONGVARBINARY), "LONGVARBINARY");
 		JDBCType.put(new Integer(Types.VARBINARY),     "VARBINARY");
-		JDBCType.put(new Integer(Types.BINARY),        "BINARY");
-		JDBCType.put(new Integer(Types.LONGVARCHAR),   "LONGVARCHAR");
-		JDBCType.put(new Integer(Types.NULL),          "NULL");
-		JDBCType.put(new Integer(Types.CHAR),          "CHAR");
-		JDBCType.put(new Integer(Types.NUMERIC),       "NUMERIC");
-		JDBCType.put(new Integer(Types.DECIMAL),       "DECIMAL");
-		JDBCType.put(new Integer(Types.INTEGER),       "INTEGER");
-		JDBCType.put(new Integer(Types.SMALLINT),      "SMALLINT");
-		JDBCType.put(new Integer(Types.FLOAT),         "FLOAT");
-		JDBCType.put(new Integer(Types.REAL),          "REAL");
-		JDBCType.put(new Integer(Types.DOUBLE),        "DOUBLE");
-		JDBCType.put(new Integer(Types.VARCHAR),       "VARCHAR");
-		JDBCType.put(new Integer(Types.BOOLEAN),       "BOOLEAN");
-		JDBCType.put(new Integer(Types.DATALINK),      "DATALINK");
-		JDBCType.put(new Integer(Types.DATE),          "DATE");
-		JDBCType.put(new Integer(Types.TIME),          "TIME");
-		JDBCType.put(new Integer(Types.TIMESTAMP),     "TIMESTAMP");
-		JDBCType.put(new Integer(Types.OTHER),         "OTHER");
-		JDBCType.put(new Integer(Types.JAVA_OBJECT),   "JAVA_OBJECT");
-		JDBCType.put(new Integer(Types.DISTINCT),      "DISTINCT");
-		JDBCType.put(new Integer(Types.STRUCT),        "STRUCT");
-		JDBCType.put(new Integer(Types.ARRAY),         "ARRAY");
-		JDBCType.put(new Integer(Types.BLOB),          "BLOB");
-		JDBCType.put(new Integer(Types.CLOB),          "CLOB");
-		JDBCType.put(new Integer(Types.REF),           "REF");
+        JDBCType.put(new Integer(Types.VARCHAR),       "VARCHAR");
 	}
 	
 //	=============================================================================
@@ -268,6 +275,24 @@ public class RowTableModelFactory implements Runnable {
 		stopNow  = true;
 	}
 
+	public RowTableModel createModelData(Connection conn, final List<String> queries) {
+        stopNow       = false;
+        beActive      = true;
+        isActive      = true;
+        message       = "";
+        errorMessage  = "";
+        this.conn     = conn;
+
+        sqlModel   = new RowTableModelMulti();
+        Thread myThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                executeBatchQueries(queries);
+            }
+        });
+        myThread.start();
+        return sqlModel;
+    }
 
 	/**
 	 * Run the query, checking the return code to see if it was an update
@@ -344,8 +369,8 @@ public class RowTableModelFactory implements Runnable {
 						colName = new String[rsmd.getColumnCount()];
 						colType = new Class[colName.length];
 						
-						// Retrieve the column names and database types; we support "Integer",
-						// "Long", "Double", "TimeStamp" and "String" (everything else)
+						// Retrieve the column names and database types, mapping unsupported
+						// types to "Object"
 						int cNameLen = 11;
 						int cTypeLen = 9;
 						int cPrecLen = 9;
@@ -526,15 +551,49 @@ public class RowTableModelFactory implements Runnable {
 			errorMessage += "\n    " + queryOne;
 			errorMessage += "\n" + nex.getMessage();
 		} finally {
-//			Trying to close or move to the end of the ResultSet can take a LONG time on
-//			Sybase; so we'll just close the Statement and let the underlying JDBC
-//			classes clean up after us ...
-//			try { if (rset != null) rset.afterLast(); } catch (Exception ex2) { }
 			try { if (rset != null) rset.close(); } catch (Exception ex2) { }
 			try { if (stmt != null) stmt.close(); } catch (Exception ex2) { }
 		}
 	}
 
+    private void executeBatchQueries(List<String> queries) {
+        sqlModel = new RowTableModelMulti();
+        
+        String[] colName = { "Rows Updated" };
+        Class<?>[] colType =  { String.class };
+        sqlModel.setColumnData(colName, colType);
+        try(Statement stmt = conn.createStatement()) {
+            conn.setAutoCommit(false);
+            for (int cnt=0;  cnt<queries.size();  cnt++) {
+                String query = queries.get(cnt);
+                if (! query.startsWith("--") && query.trim().length() > 0) {
+                    stmt.addBatch(query);
+                }
+                if (cnt % 100 == 99  ||  cnt == queries.size()-1) {
+                    int[] results = stmt.executeBatch();
+                    for (int result : results) {
+                        Object[] rowData = { new Integer(result) };
+                        sqlModel.addRow(rowData, true);
+                        message += "Rows updated: " + result;
+                    }
+                    conn.commit();
+                }
+            }
+        } catch (SQLException sqlex) {
+            SqlToolkit.appLogger.logFatal("   RTMF.execute.SQLEX: " + sqlex);
+            message += "\n\n" + sqlex.getMessage();
+            errorMessage += "\n\n============================================================";
+            errorMessage += "\nQuery:";
+            errorMessage += "\n" + sqlex.getMessage();
+        }
+
+        getOut();
+        conn  = null;
+        query = null;
+        isActive = false;
+        beActive = false;
+        stopNow  = true;
+    }
 
 	/**
 	 * Add padding to the end of some text to make it a specific length
