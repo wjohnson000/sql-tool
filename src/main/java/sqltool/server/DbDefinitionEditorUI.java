@@ -1,6 +1,8 @@
 package sqltool.server;
 
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.sql.Connection;
 import java.util.Map;
@@ -45,6 +47,7 @@ public class DbDefinitionEditorUI extends JDialog {
 	private JButton cancelBtn = new JButton();
 	private JButton acceptBtn = new JButton();
 	private JButton testBtn = new JButton();
+	private JButton copyPasswordBtn = new JButton();
 
 
 	/**
@@ -102,13 +105,15 @@ public class DbDefinitionEditorUI extends JDialog {
 		jLabel7.setText(" ");
         jLabel8.setText("Alias:");
         jLabel9.setText("Is Active:");
-		cancelBtn.setMargin(new Insets(0, 4, 0, 4));
+
+        cancelBtn.setMargin(new Insets(0, 4, 0, 4));
 		cancelBtn.setText("cancel");
 		cancelBtn.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				cancelBtn_actionPerformed(e);
 			}
 		});
+
 		acceptBtn.setMargin(new Insets(0, 4, 0, 4));
 		acceptBtn.setText("accept");
 		acceptBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -117,7 +122,6 @@ public class DbDefinitionEditorUI extends JDialog {
 			}
 		});
 
-//		this.setResizable(false);
 		testBtn.setMargin(new Insets(0, 4, 0, 4));
 		testBtn.setText("test connection");
 		testBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -125,6 +129,14 @@ public class DbDefinitionEditorUI extends JDialog {
 				testBtn_actionPerformed(e);
 			}
 		});
+
+        copyPasswordBtn.setMargin(new Insets(0, 4, 0, 4));
+        copyPasswordBtn.setText("copy password");
+        copyPasswordBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                copyPasswordBtn_actionPerformed(e);
+            }
+        });
 
 		getContentPane().add(panel1);
 		panel1.add(jLabel7,   new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0
@@ -162,6 +174,7 @@ public class DbDefinitionEditorUI extends JDialog {
 		jPanel1.add(acceptBtn, null);
 		jPanel1.add(cancelBtn, null);
 		jPanel1.add(testBtn, null);
+		jPanel1.add(copyPasswordBtn, null);
 	}
 
 	/**
@@ -245,6 +258,13 @@ public class DbDefinitionEditorUI extends JDialog {
 			try { conn.close(); } catch (Exception ex) { }
 		}
 		setCursor(saveCursor);
+	}
+
+	void copyPasswordBtn_actionPerformed(ActionEvent e) {
+	    String pwd = new String(passwordTF.getPassword());
+	    StringSelection selection = new StringSelection(pwd);
+	    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+	    clipboard.setContents(selection, selection);
 	}
 
 	/**

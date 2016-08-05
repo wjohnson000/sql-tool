@@ -2,10 +2,20 @@ package sqltool.query;
 
 import java.awt.Color;
 import java.util.ArrayList;
+
+import javax.swing.JTextPane;
 import javax.swing.text.*;
 import javax.swing.event.DocumentEvent;
 
+import sqltool.common.SqlToolkit;
 
+
+/**
+ * StyledDocument that knows how to "speak" and "parse" SQL, allowing for
+ * context-sensitive text high-lighting.
+ * @author wjohnson000
+ *
+ */
 public class SqlDocumentSave extends DefaultStyledDocument {
 	
 	static final long serialVersionUID = 8306837094897482045L;
@@ -68,11 +78,11 @@ public class SqlDocumentSave extends DefaultStyledDocument {
 //	=============================================================================
 //	Helper enumeration and class, to assist with the SQL parsing effort
 //	=============================================================================
-	enum     TextType {
+	enum TextType {
 		COMMENT, KEYWORD, FUNCTION, NUMERIC, CHARACTER, WHITE_SPACE, OTHER
 	};
 
-	class    SqlChunk {
+	class SqlChunk {
 		int      startPos;
 		int      length;
 		TextType type;
@@ -92,13 +102,15 @@ public class SqlDocumentSave extends DefaultStyledDocument {
 //	-- functionList: list of function names associated with the current database
 //	-- styleMap: associate position in text with a particular style
 //	=============================================================================
-	int       lineCount = 1;
-	boolean   adjustDone = true;
-	boolean   bulkLoad   = false;
-	String    maxLine = "";
-	String[]  keywordList;
-	String[]  functionList;
-	ArrayList<SqlChunk> chunks = new ArrayList<SqlChunk>(10);
+	private int       lineCount = 1;
+	private boolean   adjustDone = true;
+	private boolean   bulkLoad   = false;
+	private String    maxLine = "";
+	private String[]  keywordList;
+	private String[]  functionList;
+	private ArrayList<SqlChunk> chunks = new ArrayList<SqlChunk>(10);
+
+	JTextPane         myPane;
 
 
 	/**
@@ -133,7 +145,10 @@ public class SqlDocumentSave extends DefaultStyledDocument {
 		
 		setDefaultKeywords();
 	}
-	
+
+	public void setTextPane(JTextPane aPane) {
+	    myPane = aPane;
+	}
 
 	/**
 	 * Method that handles insertion of new text: call the parent method
@@ -281,6 +296,7 @@ public class SqlDocumentSave extends DefaultStyledDocument {
 	 * Return the query given a text index and a delimiter ...
 	 */
 	public String getQueryAtIndex(int ndx, String delim) {
+
 		StringBuffer query = new StringBuffer(512);
 		Style comment = getStyle("Green");
 		boolean onlyOne = true;
@@ -325,10 +341,18 @@ public class SqlDocumentSave extends DefaultStyledDocument {
 	 * color the text.
 	 */
 	private void setPrettyColors() {
-		if (bulkLoad) {
+		if (bulkLoad  ||  ! isSafeToProcess()) {
 			return;
 		}
 
+        int caretPosition = 0;
+		if (myPane != null) {
+		    caretPosition = myPane.getCaretPosition();
+		    myPane.setDocument(new DefaultStyledDocument());
+		}
+
+		SqlToolkit.appLogger.logDebug(">>>Enter 'setPrettyColors' ... " + Thread.currentThread());
+		long nnow = System.currentTimeMillis();
 		adjustDone = false;
 		lineCount = 1;
 		maxLine  = "";
@@ -360,7 +384,6 @@ public class SqlDocumentSave extends DefaultStyledDocument {
 				curLine.append(text[pos1]);
 			}
 		}
-
 
 		// Pass two:
 		//   chunk of the text and set the pretty colors
@@ -404,10 +427,26 @@ public class SqlDocumentSave extends DefaultStyledDocument {
 
 		// We are *really* done, so fire an event to notify our listeners that
 		// it's safe to do any subsequent processing.
-		adjustDone = true;
-		applyStyle();
+		try {
+			this.writeLock();
+			SqlToolkit.appLogger.logDebug("...Check1 'setPrettyColors' ... " + (System.currentTimeMillis()-nnow) + " ms");
+			nnow = System.currentTimeMillis();
 
-		this.fireChangedUpdate(new AbstractDocument.DefaultDocumentEvent(0, getLength(), DocumentEvent.EventType.CHANGE));
+			applyStyle();
+			SqlToolkit.appLogger.logDebug("...Check2 'setPrettyColors' ... " + (System.currentTimeMillis()-nnow) + " ms");
+			nnow = System.currentTimeMillis();
+		} finally {
+		    if (myPane != null) {
+		        myPane.setDocument(this);
+		        myPane.setCaretPosition(caretPosition);
+		    }
+
+		    adjustDone = true;
+			this.fireChangedUpdate(new DefaultDocumentEvent(0, getLength(), DocumentEvent.EventType.CHANGE));
+			this.writeUnlock();
+		}
+		
+		SqlToolkit.appLogger.logDebug("<<<Exit 'setPrettyColors' ... " + (System.currentTimeMillis()-nnow) + " ms");
 	}
 
 
@@ -582,9 +621,7 @@ public class SqlDocumentSave extends DefaultStyledDocument {
 	 * @return TRUE of the character is alpha, FALSE otherwise
 	 */
 	private boolean isAlpha(char ch) {
-		return (ch >= 'a' && ch <= 'z')  ||
-		(ch >= 'A' && ch <= 'Z')  ||
-		ch == '_';
+		return (ch >= 'a' && ch <= 'z')  || (ch >= 'A' && ch <= 'Z')  || ch == '_';
 	}
 	
 
