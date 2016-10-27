@@ -8,7 +8,7 @@
 
   <properties>
     <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
-    <java.compiler.version>1.7</java.compiler.version>
+    <java.compiler.version>1.8</java.compiler.version>
     <java.compiler.encoding>UTF-8</java.compiler.encoding>
   </properties>
 

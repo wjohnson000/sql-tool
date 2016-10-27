@@ -26,12 +26,7 @@ public class SchemaPanel extends TabParentPanel implements Observer {
 	private static final long serialVersionUID = 5853109474530428028L;
 
 	private static final String INFO_TAB      = "DB Info";
-	private static final String KEYWORD_TAB   = "Keyword";
-	private static final String TABLE_TAB     = "Table";
-	private static final String VIEW_TAB      = "View";
 	private static final String CUSTOM_TAB    = "Custom";
-	private static final String SYNONYM_TAB   = "Synonym";
-	private static final String PROCEDURE_TAB = "Procedure";
 	
 	private JComboBox serverListCB = new JComboBox();
 	private JTabbedPane tabbedPane = new JTabbedPane();
@@ -40,12 +35,6 @@ public class SchemaPanel extends TabParentPanel implements Observer {
 	private JButton refreshBtn = new JButton();
 
 	private InfoPanel        infoPanel    = new InfoPanel();
-	private KeywordPanel     keywordPanel = new KeywordPanel();
-
-	private DbGenericPanel   tablePanel   = new DbGenericPanel(DbInfoModel.MODE_TABLE);
-	private DbGenericPanel   viewPanel    = new DbGenericPanel(DbInfoModel.MODE_VIEW);
-	private DbGenericPanel   synonymPanel = new DbGenericPanel(DbInfoModel.MODE_SYNONYM);
-	private DbGenericPanel   procPanel    = new DbGenericPanel(DbInfoModel.MODE_PROCEDURE);
 	private DbCustomPanel    customPanel  = new DbCustomPanel();
 	
 	
@@ -119,12 +108,7 @@ public class SchemaPanel extends TabParentPanel implements Observer {
 		});
 		
 		tabbedPane.add(infoPanel, INFO_TAB);
-		tabbedPane.add(tablePanel, TABLE_TAB);
-		tabbedPane.add(viewPanel, VIEW_TAB);
-		tabbedPane.add(procPanel, PROCEDURE_TAB);
-		tabbedPane.add(synonymPanel, SYNONYM_TAB);
 		tabbedPane.add(customPanel, CUSTOM_TAB);
-		tabbedPane.add(keywordPanel, KEYWORD_TAB);
 		
 		add(mainPanel, BorderLayout.NORTH);
 		add(tabbedPane, BorderLayout.CENTER);
@@ -132,7 +116,6 @@ public class SchemaPanel extends TabParentPanel implements Observer {
 		
 		SqlToolkit.userConfig.addObserver(this);
 	}
-	
 	
 	/**
 	 *  Set the list of servers ...
@@ -146,7 +129,6 @@ public class SchemaPanel extends TabParentPanel implements Observer {
 		dbSelectAndRefresh(null, false);
 	}
 	
-	
 	/**
 	 * Clean-up things when the panel is going away
 	 */
@@ -156,10 +138,6 @@ public class SchemaPanel extends TabParentPanel implements Observer {
 
 		// Help the GC process a little ...
 		removeAll();
-		tablePanel   = null;
-		viewPanel    = null;
-		synonymPanel = null;
-		procPanel    = null;
 		customPanel  = null;
 		serverListCB = null;
 
@@ -223,15 +201,10 @@ public class SchemaPanel extends TabParentPanel implements Observer {
 		setCursor(saveCursor);
 
 		infoPanel.setModel(dbModel);
-		keywordPanel.setModel(dbModel);
-		tablePanel.setModel(dbModel);
-		viewPanel.setModel(dbModel);
-		synonymPanel.setModel(dbModel);
-		procPanel.setModel(dbModel);
 		customPanel.setModel(dbModel);
 
 		// Disable the "Custom" tab if we have no data for this database
-		tabbedPane.setEnabledAt(5, dbModel.isCustomModelDefined());
+		tabbedPane.setEnabledAt(1, dbModel.isCustomModelDefined());
 	}
 
 

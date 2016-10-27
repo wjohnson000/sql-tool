@@ -32,6 +32,7 @@ public class PostgresCustomModel extends DbCustomModel {
         this.registerDataType(new ViewDefintionType());
         this.registerDataType(new SequenceDataType());
         this.registerDataType(new FunctionDataType());
+        this.registerDataType(new DataTypeType());
         this.registerDataType(new TriggerDataType());
         this.registerDataType(new IndexDataType());
 	}

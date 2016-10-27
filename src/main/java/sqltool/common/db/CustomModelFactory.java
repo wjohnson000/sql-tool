@@ -33,6 +33,8 @@ public class CustomModelFactory {
 				res = new sqltool.schema.custom.mysql.MySqlCustomModel(conn);
 			} else if (dbName.equalsIgnoreCase("PostgreSQL")) {
 			    res = new sqltool.schema.custom.postgres.PostgresCustomModel(conn);
+			} else {
+			    res = new sqltool.schema.custom.generic.GenericCustomModel(conn);
 			}
 		} catch (SQLException sqlex) {
 		} 
