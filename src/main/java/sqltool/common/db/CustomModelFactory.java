@@ -9,7 +9,7 @@ import java.sql.SQLException;
  * Admittedly ugly, this generates a handler for doing custom database stuff,
  * which means anything outside of the standard JDBC and/or meta-data.
  * 
- * Currently the only implementation is for Oracle, but others could be added
+ * Currently there are implementations for Oracle, MySQL and PostgreSQL, and others could be added
  * 
  * @author wjohnson000
  *

@@ -1,12 +1,11 @@
 package sqltool.schema.custom.postgres;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Extend {@link BaseDataType} to support "DataType" data, which are builtin and custom types.
+ * Extend {@link BaseDataType} to support "DataType" data, which are built-in and custom types.
  * 
  * @author wjohnson000
  *

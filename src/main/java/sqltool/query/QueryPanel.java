@@ -1196,7 +1196,7 @@ public class QueryPanel extends TabParentPanel {
                     TableColumn tc = tcm.getColumn(i);
                     int colWidth = resultTableModel.getCharacterWidth(i);
                     int hdrWidth = String.valueOf(tc.getHeaderValue()).length() * 7 / 4;
-                    int pixels = (Math.max(colWidth, hdrWidth) + 2) * 5;
+                    int pixels = (Math.max(colWidth, hdrWidth) + 5) * 5;
                     tc.setPreferredWidth(Math.min(pixels, 400));
                 }
 
