@@ -16,10 +16,15 @@ set jopts=-Xms384m -Xmx768m -Xss96m -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF
 REM ===================================================================
 REM Add all of the JAR files to the class path and start the app
 REM ===================================================================
-set cp=.
+set cp=%base%\target\sqltool-1.0.0.jar
 for %%j in (%jars%\*.jar) do call :AddToPath %%j
 REM set cp=%cp%;%base%\lib\sqltool.jar
-set cp=%cp%;%base%\target\sqltool-1.0.0.jar
+
+REM echo ==================================================================
+REM java -version
+REM echo ==================================================================
+REM ECHO java -classpath "%cp%" %jopts% sqltool.SqlToolMain
+REM echo ==================================================================
 
 java -classpath "%cp%" %jopts% sqltool.SqlToolMain
 goto :EOF
