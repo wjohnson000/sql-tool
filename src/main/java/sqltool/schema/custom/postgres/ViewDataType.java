@@ -47,8 +47,7 @@ public class ViewDataType extends BaseDataType {
 		String query =
 			"SELECT table_name " +
 			"  FROM information_schema.tables " +
-			" WHERE table_catalog = '" + catalog + "' " +
-            "   AND table_schema = '" + schema + "' " +
+			catalogAndSchema("table_catalog", catalog, "table_schema", schema) +
 			"   AND table_type = 'VIEW' " +
 			" ORDER BY table_name ";
 
@@ -75,8 +74,7 @@ public class ViewDataType extends BaseDataType {
 			"SELECT ordinal_position, column_name, data_type, udt_name," +
 			"       is_nullable, character_maximum_length, numeric_precision " +
 			"  FROM information_schema.columns " +
-            " WHERE table_catalog = '" + catalog + "' " +
-            "   AND table_schema = '" + schema + "' " +
+            catalogAndSchema("table_catalog", catalog, "table_schema", schema) +
 			"   AND table_name = '" + entry + "' " +
 			" ORDER BY ordinal_position ";
 

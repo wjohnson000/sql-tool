@@ -37,8 +37,7 @@ public class FunctionDataType extends BaseDataType {
 		String query =
 			"SELECT routine_name " +
 			"  FROM information_schema.routines " +
-			" WHERE routine_catalog = '" + catalog + "' " +
-            "   AND routine_schema = '" + schema + "' " +
+			catalogAndSchema("routine_catalog", catalog, "routine_schema", schema) +
 			" ORDER BY routine_name ";
 
 		List<String[]> rows = runQuery(query);
@@ -60,12 +59,16 @@ public class FunctionDataType extends BaseDataType {
 			return res;
 		}
 
-        String query =
-            "SELECT routine_name, data_type, routine_definition, external_language " +
-            "  FROM information_schema.routines " +
-            " WHERE routine_catalog = '" + catalog + "' " +
-            "   AND routine_schema = '" + schema + "' " +
-            "   AND routine_name = '" + entry + "'";
+//        String query =
+//            "SELECT routine_name, data_type, routine_definition, external_language " +
+//            "  FROM information_schema.routines " +
+//            catalogAndSchema("routine_catalog", catalog, "routine_schema", schema) +
+//            "   AND routine_name = '" + entry + "'";
+
+		String query =
+            "SELECT proname, prorettype, prosrc, 'PLPGSQL' " +
+		    "  FROM pg_catalog.pg_proc " +
+            " WHERE proname = '" + entry + "'";
 
 		List<String[]> rows = runQuery(query);
 		StringBuffer scriptSB = new StringBuffer(44 * rows.size());

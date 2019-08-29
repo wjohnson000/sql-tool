@@ -2,6 +2,7 @@ package sqltool.common.db;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +122,9 @@ public class DbInfoModel {
 				retrieveStringLists();
 				retrieveSchemaList();
 				retrieveCatalogList();
+				if (schemaList.length == 1  &&  schemaList[0].trim().isEmpty()) {
+				    schemaList = catalogList;
+				}
 				customModel = CustomModelFactory.getCustomModel(conn);
 			}
 		}

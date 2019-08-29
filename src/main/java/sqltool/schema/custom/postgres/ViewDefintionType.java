@@ -47,8 +47,7 @@ public class ViewDefintionType extends BaseDataType {
 		String query =
 			"SELECT table_name " +
 			"  FROM information_schema.views " +
-			" WHERE table_catalog = '" + catalog + "' " +
-            "   AND table_schema = '" + schema + "' " +
+            catalogAndSchema("table_catalog", catalog, "table_schema", schema) +
 			" ORDER BY table_name ";
 
 		List<String[]> rows = runQuery(query);
@@ -73,8 +72,7 @@ public class ViewDefintionType extends BaseDataType {
 		String query =
 			"SELECT view_definition " +
 			"  FROM information_schema.views " +
-            " WHERE table_catalog = '" + catalog + "' " +
-            "   AND table_schema = '" + schema + "' " +
+            catalogAndSchema("table_catalog", catalog, "table_schema", schema) +
 			"   AND table_name = '" + entry + "' ";
 
 		List<String[]> rows = runQuery(query);

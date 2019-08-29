@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -1094,7 +1094,7 @@ public class QueryPanel extends TabParentPanel {
             prevDir = path;
             Path fpath = Paths.get(path, file);
             try {
-                List<String> queries = Files.readAllLines(fpath, Charset.forName("UTF-8"));
+                List<String> queries = Files.readAllLines(fpath, StandardCharsets.UTF_8);
                 dbDef = (DbDefinition) serverListCB.getSelectedItem();
                 if (dbDef == null) {
                     JOptionPane.showMessageDialog(this, "No database server defined", "",

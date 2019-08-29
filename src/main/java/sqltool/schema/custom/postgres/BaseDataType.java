@@ -111,6 +111,26 @@ public abstract class BaseDataType implements DbRawDataType {
 		return DISCLAIMER + "DROP " + getDataType() + " " + qualifiedName(schema, entry) + ";";
 	}
 
+	protected String catalogAndSchema(String catalogField, String catalog, String schemaField, String schema) {
+	    StringBuilder buff = new StringBuilder();
+
+	    buff.append(" WHERE ").append(catalogField);
+	    if (catalog == null  ||  catalog.trim().isEmpty()) {
+	        buff.append(" LIKE '%' ");
+	    } else {
+	        buff.append(" = '").append(catalog).append("' ");
+	    }
+
+	    buff.append(" AND ").append(schemaField);
+        if (schema == null  ||  schema.trim().isEmpty()) {
+            buff.append(" LIKE '%' ");
+        } else {
+            buff.append(" = '").append(schema).append("' ");
+        }
+
+        return  buff.toString();
+	}
+
 	/**
 	 * Generic method for getting the results of a query.  The data is
 	 * returned as a list of "String" array.

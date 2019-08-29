@@ -37,8 +37,7 @@ public class SequenceDataType extends BaseDataType {
 		String query =
 			"SELECT sequence_name " +
 			"  FROM information_schema.sequences " +
-			" WHERE sequence_catalog = '" + catalog + "' " +
-            "   AND sequence_schema = '" + schema + "' " +
+			catalogAndSchema("sequence_catalog", catalog, "sequence_schema", schema) +
 			" ORDER BY sequence_name ";
 
 		List<String[]> rows = runQuery(query);
@@ -63,8 +62,7 @@ public class SequenceDataType extends BaseDataType {
         String query =
             "SELECT sequence_name, data_type, start_value, increment, maximum_value, cycle_option " +
             "  FROM information_schema.sequences " +
-            " WHERE sequence_catalog = '" + catalog + "' " +
-            "   AND sequence_schema = '" + schema + "' " +
+            catalogAndSchema("sequence_catalog", catalog, "sequence_schema", schema) +
             "   AND sequence_name = '" + entry + "'";
 
 		List<String[]> rows = runQuery(query);
@@ -96,8 +94,7 @@ public class SequenceDataType extends BaseDataType {
         String query =
             "SELECT sequence_name, start_value, increment, maximum_value " +
             "  FROM information_schema.sequences " +
-            " WHERE sequence_catalog = '" + catalog + "' " +
-            "   AND sequence_schema = '" + schema + "' " +
+            catalogAndSchema("sequence_catalog", catalog, "sequence_schema", schema) +
             "   AND sequence_name = '" + entry + "'";
 
         List<String[]> rows = runQuery(query);

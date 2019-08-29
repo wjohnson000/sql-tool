@@ -41,8 +41,7 @@ public class ConstraintDataType extends BaseDataType {
             "       pg_catalog.pg_get_constraintdef(r.oid, TRUE) AS condef " +
             "  FROM information_schema.table_constraints AS tc " +
             "  JOIN pg_catalog.pg_constraint AS r ON r.conname = tc.constraint_name " +
-            " WHERE tc.constraint_catalog = '" + catalog + "' " +
-            "   AND tc.constraint_schema = '" + schema + "' " +
+            catalogAndSchema("tc.constraint_catalog", catalog, "tc.constraint_schema", schema) +
             " ORDER BY tc.constraint_name ASC ";
 
 		List<String[]> rows = runQuery(query);
@@ -71,8 +70,7 @@ public class ConstraintDataType extends BaseDataType {
             "       pg_catalog.pg_get_constraintdef(r.oid, TRUE) AS condef " +
             "  FROM information_schema.table_constraints AS tc " +
             "  JOIN pg_catalog.pg_constraint AS r ON r.conname = tc.constraint_name " +
-            " WHERE tc.constraint_catalog = '" + catalog + "' " +
-            "   AND tc.constraint_schema = '" + schema + "' " +
+            catalogAndSchema("tc.constraint_catalog", catalog, "tc.constraint_schema", schema) +
             "   AND tc.constraint_name = '" + entry + "' " +
             " ORDER BY tc.constraint_name ASC ";
 

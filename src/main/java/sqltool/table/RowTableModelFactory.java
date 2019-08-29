@@ -385,7 +385,9 @@ public class RowTableModelFactory implements Runnable {
 								scal = rsmd.getScale(i+1);
 								prec = rsmd.getPrecision(i+1);
 							} catch (Exception ex) { }
-							if (type == Types.BIGINT   ||  type == Types.INTEGER  ||
+							if (type == Types.BIGINT) {
+							    colType[i] = Long.class;
+							} else if (type == Types.INTEGER  ||
 									type == Types.SMALLINT ||  type == Types.TINYINT  ||
 									(type == Types.BIT  &&  prec > 1)) {
 								colType[i] = Integer.class;

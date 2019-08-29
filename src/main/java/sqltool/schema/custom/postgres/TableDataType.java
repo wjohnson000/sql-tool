@@ -37,8 +37,7 @@ public class TableDataType extends BaseDataType {
 		String query =
 			"SELECT table_name " +
 			"  FROM information_schema.tables " +
-			" WHERE table_catalog = '" + catalog + "' " +
-            "   AND table_schema = '" + schema + "' " +
+			catalogAndSchema("table_catalog", catalog, "table_schema", schema) +
 			"   AND table_type = 'BASE TABLE' " +
 			" ORDER BY table_name ";
 
@@ -65,8 +64,7 @@ public class TableDataType extends BaseDataType {
 			"SELECT ordinal_position, column_name, data_type, udt_name," +
 			"       is_nullable, character_maximum_length, numeric_precision " +
 			"  FROM information_schema.columns " +
-            " WHERE table_catalog = '" + catalog + "' " +
-            "   AND table_schema = '" + schema + "' " +
+            catalogAndSchema("table_catalog", catalog, "table_schema", schema) +
 			"   AND table_name = '" + entry + "' " +
 			" ORDER BY ordinal_position ";
 
@@ -142,8 +140,7 @@ public class TableDataType extends BaseDataType {
 	        "       pg_catalog.pg_get_constraintdef(r.oid, TRUE) AS condef " +
 	        "  FROM information_schema.table_constraints AS tc " +
 	        "  JOIN pg_catalog.pg_constraint AS r ON r.conname = tc.constraint_name " +
-	        " WHERE tc.constraint_catalog = '" + catalog + "' " +
-	        "   AND tc.constraint_schema = '" + schema + "' " +
+            catalogAndSchema("tc.constraint_catalog", catalog, "tc.constraint_schema", schema) +
 	        "   AND tc.table_name = '" + entry + "' " +
 	        " ORDER BY tc.constraint_name ASC ";
 	    return runQuery(query);

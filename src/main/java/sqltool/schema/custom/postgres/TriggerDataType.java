@@ -37,8 +37,7 @@ public class TriggerDataType extends BaseDataType {
 		String query =
 			"SELECT trigger_name " +
 			"  FROM information_schema.triggers " +
-			" WHERE trigger_catalog = '" + catalog + "' " +
-            "   AND trigger_schema = '" + schema + "' " +
+			catalogAndSchema("trigger_catalog", catalog, "trigger_schema", schema) +
 			" ORDER BY trigger_name ";
 
 		List<String[]> rows = runQuery(query);
@@ -64,8 +63,7 @@ public class TriggerDataType extends BaseDataType {
             "SELECT trigger_name, event_manipulation, event_object_schema, event_object_table," +
             "       action_statement, action_orientation, action_timing " +
             "  FROM information_schema.triggers " +
-            " WHERE trigger_catalog = '" + catalog + "' " +
-            "   AND trigger_schema = '" + schema + "' " +
+            catalogAndSchema("trigger_catalog", catalog, "trigger_schema", schema) +
             "   AND trigger_name = '" + entry + "'";
 
 		List<String[]> rows = runQuery(query);
